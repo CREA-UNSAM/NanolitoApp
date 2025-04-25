@@ -15,13 +15,13 @@ import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import java.util.Map;
 import java.util.Set;
 
 public class BluetoothHelper {
     private static BluetoothHelper INSTANCE;
     public static final int REQUEST_ENABLE_BLUETOOTH = 2;
     private static BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-    private static ActivityResultLauncher<String[]> requestBluetoothPermissionsLauncher;
 
     private BluetoothHelper() {
 
@@ -29,13 +29,6 @@ public class BluetoothHelper {
 
     public static void resetAdapter(){
         adapter = BluetoothAdapter.getDefaultAdapter();
-    }
-
-    public static void requestPermission(Activity activity){
-        requestBluetoothPermissionsLauncher = activity.registerForActivityResult(
-                new ActivityResultContracts.RequestMultiplePermissions(),
-                this::handleBluetoothPermissionsResult
-        );
     }
 
     public static boolean isAvailable(){

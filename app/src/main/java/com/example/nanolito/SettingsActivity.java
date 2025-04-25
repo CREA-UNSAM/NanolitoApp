@@ -1,11 +1,10 @@
 package com.example.nanolito;
 
-import android.bluetooth.BluetoothClass;
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.widget.TextView;
 import android.widget.Toast;
 
 
@@ -24,6 +23,9 @@ public class SettingsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
+        if(BluetoothAdapter.getDefaultAdapter() == null){
+            Toast.makeText(this, "Bluetooth not working", Toast.LENGTH_LONG).show();
+        }
 
         if(!BluetoothHelper.isEnabled()){
             BluetoothHelper.enableBluetooth(this);
@@ -33,7 +35,7 @@ public class SettingsActivity extends AppCompatActivity {
             Set<BluetoothDevice> devices = BluetoothHelper.getPairedDevices();
             List<BluetoothDevice> deviceList = new ArrayList<>(devices);
 
-            DeviceAdapter adapter = new DeviceAdapter(deviceList, device -> {
+            BluetoothDeviceAdapter adapter = new BluetoothDeviceAdapter(deviceList, device -> {
                 Toast.makeText(this, "Clicked: " + device.getName(), Toast.LENGTH_SHORT).show();
             });
 

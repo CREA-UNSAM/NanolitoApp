@@ -22,10 +22,13 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        BluetoothPermissionHelper bluetoothPermissionHelper = new BluetoothPermissionHelper(this);
+        bluetoothPermissionHelper.setOnBluetoothPermissionsGrantedListener(this);
+
         SharedPreferences sharedPref = getSharedPreferences("NanolitoSettings", Context.MODE_PRIVATE);
         editor = sharedPref.edit();
 
-        BluetoothHelper.requestBluetoothPermissions(this);
     }
 
     public void launchSettings(View v){
