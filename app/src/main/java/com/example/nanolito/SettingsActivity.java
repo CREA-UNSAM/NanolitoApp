@@ -5,10 +5,13 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
@@ -31,15 +34,23 @@ public class SettingsActivity extends AppCompatActivity {
             BluetoothHelper.enableBluetooth(this);
         }
         else {
-            RecyclerView deviceRecyclerView = findViewById(R.id.deviceList);
             Set<BluetoothDevice> devices = BluetoothHelper.getPairedDevices();
             List<BluetoothDevice> deviceList = new ArrayList<>(devices);
 
-            BluetoothDeviceAdapter adapter = new BluetoothDeviceAdapter(deviceList, device -> {
-                Toast.makeText(this, "Clicked: " + device.getName(), Toast.LENGTH_SHORT).show();
-            });
+            RecyclerView deviceRecyclerView = findViewById(R.id.deviceList);
+            deviceRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+            BluetoothDeviceAdapter adapter = new BluetoothDeviceAdapter(deviceList);
 
             deviceRecyclerView.setAdapter(adapter);
+
+
+            TextView text = findViewById(R.id.DeviceText);
+            StringBuilder str = new StringBuilder();
+            for(BluetoothDevice device: devices){
+                str.append(device.getName()).append(" || ").append(device.getAddress()).append("\n");
+            }
+            text.setText(str.toString());
         }
 
         sharedPref = getSharedPreferences("NanolitoSettings", Context.MODE_PRIVATE);

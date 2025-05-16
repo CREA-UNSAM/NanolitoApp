@@ -1,18 +1,21 @@
 package com.example.nanolito;
 
+import android.bluetooth.BluetoothDevice;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
 public class BluetoothDeviceAdapter extends RecyclerView.Adapter<BluetoothDeviceAdapter.ViewHolder> {
 
-    private List<BluetoothDeviceModel> deviceList;
+    private List<BluetoothDevice> deviceList;
 
-    public BluetoothDeviceAdapter(List<BluetoothDeviceModel> deviceList) {
+    public BluetoothDeviceAdapter(List<BluetoothDevice> deviceList) {
         this.deviceList = deviceList;
     }
 
@@ -25,8 +28,8 @@ public class BluetoothDeviceAdapter extends RecyclerView.Adapter<BluetoothDevice
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        BluetoothDeviceModel device = deviceList.get(position);
+    public void onBindViewHolder(@NonNull ViewHolder holder, final int position) {
+        BluetoothDevice device = deviceList.get(position);
         holder.textViewDeviceName.setText(device.getName());
         holder.textViewDeviceAddress.setText(device.getAddress());
     }
@@ -42,6 +45,10 @@ public class BluetoothDeviceAdapter extends RecyclerView.Adapter<BluetoothDevice
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
+
+            itemView.setOnClickListener(view -> {
+                
+            });
             textViewDeviceName = itemView.findViewById(R.id.textViewDeviceName);
             textViewDeviceAddress = itemView.findViewById(R.id.textViewDeviceAddress);
         }

@@ -24,7 +24,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         BluetoothPermissionHelper bluetoothPermissionHelper = new BluetoothPermissionHelper(this);
-        bluetoothPermissionHelper.setOnBluetoothPermissionsGrantedListener(this);
+        bluetoothPermissionHelper.askForBluetoothPermissions();
 
         SharedPreferences sharedPref = getSharedPreferences("NanolitoSettings", Context.MODE_PRIVATE);
         editor = sharedPref.edit();
