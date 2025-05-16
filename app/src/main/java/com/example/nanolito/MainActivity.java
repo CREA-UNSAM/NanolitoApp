@@ -16,7 +16,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 
 public class MainActivity extends AppCompatActivity {
-    SharedPreferences.Editor editor;
+    SharedPreferences sharedPref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,19 +26,15 @@ public class MainActivity extends AppCompatActivity {
         BluetoothPermissionHelper bluetoothPermissionHelper = new BluetoothPermissionHelper(this);
         bluetoothPermissionHelper.askForBluetoothPermissions();
 
-        SharedPreferences sharedPref = getSharedPreferences("NanolitoSettings", Context.MODE_PRIVATE);
-        editor = sharedPref.edit();
+        sharedPref = getSharedPreferences("NanolitoSettings", Context.MODE_PRIVATE);
 
+        String address = sharedPref.getString("deviceAddress", null);
+        TextView addressText = findViewById(R.id.testAddress);
+        addressText.setText(address == null ? "Selecciona un dispositivo" : address);
     }
 
     public void launchSettings(View v){
         Intent i = new Intent(this, SettingsActivity.class);
         startActivity(i);
-    }
-
-    public void changePref(View v){
-        TextView text = findViewById(R.id.textBox);
-        editor.putString("test", text.getText().toString());
-        editor.apply();
     }
 }

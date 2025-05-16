@@ -26,6 +26,9 @@ public class SettingsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
+
+        sharedPref = getSharedPreferences("NanolitoSettings", Context.MODE_PRIVATE);
+
         if(BluetoothAdapter.getDefaultAdapter() == null){
             Toast.makeText(this, "Bluetooth not working", Toast.LENGTH_LONG).show();
         }
@@ -40,20 +43,10 @@ public class SettingsActivity extends AppCompatActivity {
             RecyclerView deviceRecyclerView = findViewById(R.id.deviceList);
             deviceRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-            BluetoothDeviceAdapter adapter = new BluetoothDeviceAdapter(deviceList);
+            BluetoothDeviceAdapter adapter = new BluetoothDeviceAdapter(deviceList, sharedPref);
 
             deviceRecyclerView.setAdapter(adapter);
-
-
-            TextView text = findViewById(R.id.DeviceText);
-            StringBuilder str = new StringBuilder();
-            for(BluetoothDevice device: devices){
-                str.append(device.getName()).append(" || ").append(device.getAddress()).append("\n");
-            }
-            text.setText(str.toString());
         }
-
-        sharedPref = getSharedPreferences("NanolitoSettings", Context.MODE_PRIVATE);
 
     }
 }
