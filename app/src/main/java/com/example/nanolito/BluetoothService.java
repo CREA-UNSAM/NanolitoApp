@@ -29,12 +29,6 @@ public class BluetoothService {
     private ConnectThread connectThread;
     private ConnectedThread connectedThread;
 
-    public interface MessageConstants {
-        public static final int MESSAGE_READ = 0;
-        public static final int MESSAGE_WRITE = 1;
-        public static final int MESSAGE_TOAST = 2;
-    }
-
     public BluetoothService(@NonNull Handler handler) {
         this.handler = handler;
         this.adapter = BluetoothAdapter.getDefaultAdapter();
@@ -64,16 +58,6 @@ public class BluetoothService {
         connectedThread = new ConnectedThread(socket);
         connectedThread.start();
 
-        Observable.create(emitter -> {
-            SystemClock.sleep(500);
-            connectedThread.write("Yes!".getBytes());
-                })
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(value -> {
-                    Log.d("Rx", value.toString());
-                });
-
     }
 
     public synchronized void sendMessage(String msg) throws IOException {
@@ -81,7 +65,7 @@ public class BluetoothService {
             throw new IOException("No connected device.");
         }
 
-        connectedThread.write(msg.getBytes());
+        connectedThread.write((msg + "\n").getBytes());
     }
 
     private class ConnectedThread extends Thread {
@@ -108,6 +92,7 @@ public class BluetoothService {
             mmInStream = tmpIn;
             mmOutStream = tmpOut;
             Log.i(TAG, "Successfully established connected thread.");
+            write("ping\n".getBytes());
         }
 
         public void run() {
@@ -121,7 +106,7 @@ public class BluetoothService {
                     numBytes = mmInStream.read(mmBuffer);
                     Message readMsg = handler.obtainMessage(
                             MessageConstants.MESSAGE_READ, numBytes, -1,
-                            mmBuffer);
+                            new String(mmBuffer, 0, numBytes));
                     readMsg.sendToTarget();
                 } catch (IOException e) {
                     Log.d(TAG, "Input stream was disconnected", e);

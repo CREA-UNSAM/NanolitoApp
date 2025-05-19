@@ -57,9 +57,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void handleMessage(@NonNull Message msg) {
                 switch(msg.what) {
-                    default:
+                    case MessageConstants.MESSAGE_READ:
                         String espMsg = msg.obj.toString();
                         addressText.setText(espMsg);
+                        Log.i(TAG, "received: " + espMsg);
+                        break;
+                    case MessageConstants.MESSAGE_TOAST:
+                        String text = (String) msg.getData().get("toast");
+                        Toast.makeText(getApplicationContext(), text, Toast.LENGTH_LONG).show();
                         break;
                 }
             }
