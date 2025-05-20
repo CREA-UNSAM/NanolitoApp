@@ -1,12 +1,11 @@
 package com.example.nanolito;
 
-import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -23,14 +22,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.android.material.textfield.TextInputLayout;
-
-import io.reactivex.rxjava3.core.Observable;
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
-import io.reactivex.rxjava3.schedulers.Schedulers;
-
 import java.io.IOException;
-import java.util.UUID;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -44,7 +36,8 @@ public class MainActivity extends AppCompatActivity {
     private final ImageButton[] increaseButtons = new ImageButton[3];
     private final ImageButton[] decreaseButtons = new ImageButton[3];
     private boolean bluetoothState;
-
+    private final TextView[] sensores = new TextView[11];
+    private final int UMBRAL = 512;
     SharedPreferences sharedPref;
 
     @Override
@@ -64,6 +57,18 @@ public class MainActivity extends AppCompatActivity {
         decreaseButtons[1] = findViewById(R.id.decreaseButtonI);
         decreaseButtons[2] = findViewById(R.id.decreaseButtonD);
 
+        sensores[0] = findViewById(R.id.sens1);
+        sensores[1] = findViewById(R.id.sens2);
+        sensores[2] = findViewById(R.id.sens3);
+        sensores[3] = findViewById(R.id.sens4);
+        sensores[4] = findViewById(R.id.sens5);
+        sensores[5] = findViewById(R.id.sens6);
+        sensores[6] = findViewById(R.id.sens7);
+        sensores[7] = findViewById(R.id.sens8);
+        sensores[8] = findViewById(R.id.sens9);
+        sensores[9] = findViewById(R.id.sens10);
+        sensores[10] = findViewById(R.id.sens11);
+
         setupButtons();
 
         pidButton = findViewById(R.id.PIDButton);
@@ -79,6 +84,10 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Bluetooth is not available", Toast.LENGTH_LONG).show();
             this.finish();
         }
+
+        BluetoothPermissionHelper bluetoothPermissionHelper = new BluetoothPermissionHelper(this);
+        bluetoothPermissionHelper.setOnBluetoothPermissionsGrantedListener(this::setupBluetoothComs);
+        bluetoothPermissionHelper.askForBluetoothPermissions();
     }
 
     @Override
@@ -91,9 +100,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (!bluetoothAdapter.isEnabled())
         {
-            BluetoothPermissionHelper bluetoothPermissionHelper = new BluetoothPermissionHelper(this);
-            bluetoothPermissionHelper.setOnBluetoothPermissionsGrantedListener(this::setupBluetoothComs);
-            bluetoothPermissionHelper.askForBluetoothPermissions();
+
         }
 
         setupBluetoothComs();
@@ -106,7 +113,8 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    @Override public void onDestroy() {
+    @Override
+    public void onDestroy() {
         super.onDestroy();
         if (service != null) {
             service.stop();
@@ -120,6 +128,7 @@ public class MainActivity extends AppCompatActivity {
                 case MessageConstants.MESSAGE_READ:
                     String espMsg = msg.obj.toString();
                     Log.i(TAG, "Received: " + espMsg);
+                    processMessage(espMsg);
                     break;
                 case MessageConstants.MESSAGE_TOAST:
                     String text = (String) msg.getData().get(MessageConstants.TOAST);
@@ -131,6 +140,28 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     };
+
+    private void processMessage(String message) {
+        char command = message.charAt(0);
+        switch(command) {
+            case 'A':
+                String[] valuesStr = message.substring(1).split(":");
+                for(int i = 0; i < valuesStr.length; i++) {
+                    sensores[i].setText(valuesStr[i]);
+                    int valor = Integer.parseInt(valuesStr[i]);
+                    if (valor > UMBRAL) {
+                        sensores[i].setBackgroundColor(Color.BLACK);
+                        sensores[i].setTextColor(Color.WHITE);
+                    } else {
+                        sensores[i].setBackgroundColor(Color.WHITE);
+                        sensores[i].setTextColor(Color.BLACK);
+                    }
+                }
+                break;
+            default:
+                break;
+        }
+    }
 
     private void setupButtons() {
         for (int i = 0; i < 3; i++) {
@@ -179,7 +210,7 @@ public class MainActivity extends AppCompatActivity {
         float dValue =  Float.parseFloat(pidTexts[2].getText().toString());
 
         try{
-            service.sendMessage("p:" + pValue + "|i:" + iValue + "|d:" + dValue);
+            service.sendMessage("a" + pValue + ":" + iValue + ":" + dValue);
         } catch (IOException e) {
             Log.e(TAG, "Bluetooth Connection not started", e);
         }

@@ -167,7 +167,7 @@ public class BluetoothService {
                             new String(mmBuffer, 0, numBytes));
                     readMsg.sendToTarget();
                 } catch (IOException e) {
-                    Log.d(TAG, "Input stream was disconnected", e);
+                    Log.d(TAG, "Input stream was disconnected");
                     connectionLost();
                     break;
                 }
