@@ -34,10 +34,86 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="159dp"
         android:gravity="center"
         android:orientation="horizontal">
 
+        <TextView
+            android:id="@+id/sens1"
+            android:layout_width="36dp"
+            android:layout_height="41dp"
+            android:layout_weight="0"
+            android:background="#FFFFFF"
+            android:gravity="center"
+            android:text="0"
+            android:textAlignment="center"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/sens2"
+            android:layout_width="36dp"
+            android:layout_height="41dp"
+            android:layout_weight="0"
+            android:background="#FFFFFF"
+            android:gravity="center"
+            android:text="0"
+            android:textAlignment="center"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/sens3"
+            android:layout_width="36dp"
+            android:layout_height="41dp"
+            android:layout_weight="0"
+            android:background="#FFFFFF"
+            android:gravity="center"
+            android:text="0"
+            android:textAlignment="center"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/sens4"
+            android:layout_width="36dp"
+            android:layout_height="41dp"
+            android:layout_weight="0"
+            android:background="#FFFFFF"
+            android:gravity="center"
+            android:text="0"
+            android:textAlignment="center"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/sens5"
+            android:layout_width="36dp"
+            android:layout_height="41dp"
+            android:layout_weight="0"
+            android:background="#FFFFFF"
+            android:gravity="center"
+            android:text="0"
+            android:textAlignment="center"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/sens6"
+            android:layout_width="36dp"
+            android:layout_height="41dp"
+            android:layout_weight="0"
+            android:background="#FFFFFF"
+            android:gravity="center"
+            android:text="0"
+            android:textAlignment="center"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/sens7"
+            android:layout_width="36dp"
+            android:layout_height="41dp"
+            android:layout_weight="0"
+            android:background="#FFFFFF"
+            android:gravity="center"
+            android:text="0"
+            android:textAlignment="center"
+            android:textSize="20sp" />
     </LinearLayout>
 
     <LinearLayout
@@ -52,44 +128,108 @@
             android:gravity="center|top"
             android:orientation="horizontal">
 
-            <EditText
-                android:id="@+id/PText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="10sp"
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:ems="10"
-                android:inputType="numberDecimal"
-                android:text="999.99"
-                android:textAlignment="center"
-                android:textSize="20sp"
-                android:textStyle="bold" />
+                android:orientation="vertical">
 
-            <EditText
-                android:id="@+id/IText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="10sp"
-                android:layout_weight="1"
-                android:ems="10"
-                android:inputType="numberDecimal"
-                android:text="999.99"
-                android:textAlignment="center"
-                android:textSize="20sp"
-                android:textStyle="bold" />
+                <ImageButton
+                    android:id="@+id/increaseButtonP"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    app:srcCompat="@android:drawable/arrow_up_float" />
 
-            <EditText
-                android:id="@+id/DText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="10sp"
+                <EditText
+                    android:id="@+id/PText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10sp"
+                    android:layout_weight="1"
+                    android:ems="10"
+                    android:inputType="numberDecimal"
+                    android:text="0.0"
+                    android:textAlignment="center"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <ImageButton
+                    android:id="@+id/decreaseButtonP"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    app:srcCompat="@android:drawable/arrow_down_float" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:ems="10"
-                android:inputType="numberDecimal"
-                android:text="999.99"
-                android:textAlignment="center"
-                android:textSize="20sp"
-                android:textStyle="bold" />
+                android:orientation="vertical">
+
+                <ImageButton
+                    android:id="@+id/increaseButtonI"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    app:srcCompat="@android:drawable/arrow_up_float" />
+
+                <EditText
+                    android:id="@+id/IText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10sp"
+                    android:layout_weight="1"
+                    android:ems="10"
+                    android:inputType="numberDecimal"
+                    android:text="0.0"
+                    android:textAlignment="center"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <ImageButton
+                    android:id="@+id/decreaseButtonI"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    app:srcCompat="@android:drawable/arrow_down_float" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <ImageButton
+                    android:id="@+id/increaseButtonD"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    app:srcCompat="@android:drawable/arrow_up_float" />
+
+                <EditText
+                    android:id="@+id/DText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10sp"
+                    android:layout_weight="1"
+                    android:ems="10"
+                    android:inputType="numberDecimal"
+                    android:text="0.0"
+                    android:textAlignment="center"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <ImageButton
+                    android:id="@+id/decreaseButtonD"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    app:srcCompat="@android:drawable/arrow_down_float" />
+            </LinearLayout>
 
         </LinearLayout>
 

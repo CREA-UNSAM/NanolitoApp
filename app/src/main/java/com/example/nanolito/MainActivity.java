@@ -1,5 +1,6 @@
 package com.example.nanolito;
 
+import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
@@ -15,6 +16,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,17 +35,14 @@ import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "Logs";
-    public static Handler handler;
-    private final static int ERROR_READ = 0;
     private BluetoothAdapter bluetoothAdapter;
     private BluetoothDevice esp32;
     private BluetoothService service;
     private Button pidButton;
     private CompoundButton stateButton;
-    private EditText pText;
-    private EditText iText;
-    private EditText dText;
-
+    private final EditText[] pidTexts = new EditText[3];
+    private final ImageButton[] increaseButtons = new ImageButton[3];
+    private final ImageButton[] decreaseButtons = new ImageButton[3];
     private boolean bluetoothState;
 
     SharedPreferences sharedPref;
@@ -53,9 +52,19 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        pText = findViewById(R.id.PText);
-        iText = findViewById(R.id.IText);
-        dText = findViewById(R.id.DText);
+        pidTexts[0] = findViewById(R.id.PText);
+        pidTexts[1] = findViewById(R.id.IText);
+        pidTexts[2] = findViewById(R.id.DText);
+
+        increaseButtons[0] = findViewById(R.id.increaseButtonP);
+        increaseButtons[1] = findViewById(R.id.increaseButtonI);
+        increaseButtons[2] = findViewById(R.id.increaseButtonD);
+
+        decreaseButtons[0] = findViewById(R.id.decreaseButtonP);
+        decreaseButtons[1] = findViewById(R.id.decreaseButtonI);
+        decreaseButtons[2] = findViewById(R.id.decreaseButtonD);
+
+        setupButtons();
 
         pidButton = findViewById(R.id.PIDButton);
         stateButton = findViewById(R.id.connectionSwitch);
@@ -70,25 +79,6 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Bluetooth is not available", Toast.LENGTH_LONG).show();
             this.finish();
         }
-
-        handler = new Handler(Looper.getMainLooper()){
-            @Override
-            public void handleMessage(@NonNull Message msg) {
-                switch(msg.what) {
-                    case MessageConstants.MESSAGE_READ:
-                        String espMsg = msg.obj.toString();
-                        Log.i(TAG, "received: " + espMsg);
-                        break;
-                    case MessageConstants.MESSAGE_TOAST:
-                        String text = (String) msg.getData().get(MessageConstants.TOAST);
-                        Toast.makeText(getApplicationContext(), text, Toast.LENGTH_LONG).show();
-                        break;
-                    case MessageConstants.MESSAGE_STATE_CHANGE:
-                        handleBluetoothState(msg.arg1);
-                        break;
-                }
-            }
-        };
     }
 
     @Override
@@ -123,6 +113,39 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private final Handler handler = new Handler(Looper.getMainLooper()) {
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            switch (msg.what) {
+                case MessageConstants.MESSAGE_READ:
+                    String espMsg = msg.obj.toString();
+                    Log.i(TAG, "Received: " + espMsg);
+                    break;
+                case MessageConstants.MESSAGE_TOAST:
+                    String text = (String) msg.getData().get(MessageConstants.TOAST);
+                    Toast.makeText(getApplicationContext(), text, Toast.LENGTH_LONG).show();
+                    break;
+                case MessageConstants.MESSAGE_STATE_CHANGE:
+                    handleBluetoothState(msg.arg1);
+                    break;
+            }
+        }
+    };
+
+    private void setupButtons() {
+        for (int i = 0; i < 3; i++) {
+            final int index = i; // final for inner class access
+
+            increaseButtons[i].setOnClickListener(v -> {
+                changeTextValue(pidTexts[index], +1);
+            });
+
+            decreaseButtons[i].setOnClickListener(v -> {
+                changeTextValue(pidTexts[index], -1);
+            });
+        }
+    }
+
     private void setupBluetoothComs() {
         String address = sharedPref.getString("deviceAddress", null);
         if(address != null) {
@@ -151,9 +174,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void sendPID(View v) {
-        float pValue =  Float.parseFloat(pText.getText().toString());
-        float iValue =  Float.parseFloat(iText.getText().toString());
-        float dValue =  Float.parseFloat(dText.getText().toString());
+        float pValue =  Float.parseFloat(pidTexts[0].getText().toString());
+        float iValue =  Float.parseFloat(pidTexts[1].getText().toString());
+        float dValue =  Float.parseFloat(pidTexts[2].getText().toString());
 
         try{
             service.sendMessage("p:" + pValue + "|i:" + iValue + "|d:" + dValue);
@@ -178,9 +201,18 @@ public class MainActivity extends AppCompatActivity {
 
     private void setBluetoothState(boolean state) {
         bluetoothState = state;
+        stateButton.setChecked(bluetoothState);
         pidButton.setEnabled(bluetoothState);
-        pText.setEnabled(bluetoothState);
-        iText.setEnabled(bluetoothState);
-        dText.setEnabled(bluetoothState);
+
+        for (int i = 0; i < 3; i++) {
+            pidTexts[i].setEnabled(bluetoothState);
+            increaseButtons[i].setEnabled(bluetoothState);
+            decreaseButtons[i].setEnabled(bluetoothState);
+        }
+    }
+
+    private void changeTextValue(EditText field, float value) {
+        float preValue = Float.parseFloat(field.getText().toString());
+        field.setText(Float.toString(preValue + value));
     }
 }

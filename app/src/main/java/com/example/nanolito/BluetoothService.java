@@ -25,7 +25,6 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 public class BluetoothService {
     private static final String TAG = "BluetoothLog";
     private final Handler handler;
-    private final BluetoothAdapter adapter;
     private ConnectThread connectThread;
     private ConnectedThread connectedThread;
     private int state;
@@ -36,7 +35,6 @@ public class BluetoothService {
 
     public BluetoothService(@NonNull Handler handler) {
         this.handler = handler;
-        this.adapter = BluetoothAdapter.getDefaultAdapter();
         this.state = STATE_NONE;
     }
 
