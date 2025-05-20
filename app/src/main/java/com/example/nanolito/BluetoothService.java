@@ -28,10 +28,16 @@ public class BluetoothService {
     private final BluetoothAdapter adapter;
     private ConnectThread connectThread;
     private ConnectedThread connectedThread;
+    private int state;
+
+    public static final int STATE_NONE = 0;
+    public static final int STATE_CONNECTING = 1;
+    public static final int STATE_CONNECTED = 2;
 
     public BluetoothService(@NonNull Handler handler) {
         this.handler = handler;
         this.adapter = BluetoothAdapter.getDefaultAdapter();
+        this.state = STATE_NONE;
     }
 
     public synchronized void start(BluetoothDevice device) {
@@ -47,6 +53,23 @@ public class BluetoothService {
 
         connectThread = new ConnectThread(device, device.getUuids()[0].getUuid());
         connectThread.start();
+
+        notifyState();
+    }
+
+    public synchronized void stop() {
+        Log.d(TAG, "Stopping Bluetooth Service");
+
+        if (connectThread != null) {
+            connectThread.cancel();
+            connectThread = null;
+        }
+
+        if (connectedThread != null) {
+            connectedThread.cancel();
+            connectedThread = null;
+        }
+        state = STATE_NONE;
     }
 
     private synchronized void connected(BluetoothSocket socket, BluetoothDevice device) {
@@ -58,6 +81,11 @@ public class BluetoothService {
         connectedThread = new ConnectedThread(socket);
         connectedThread.start();
 
+        notifyState();
+    }
+
+    public synchronized int getState() {
+        return state;
     }
 
     public synchronized void sendMessage(String msg) throws IOException {
@@ -66,6 +94,36 @@ public class BluetoothService {
         }
 
         connectedThread.write((msg + "\n").getBytes());
+    }
+
+    private synchronized void notifyState() {
+        handler.obtainMessage(MessageConstants.MESSAGE_STATE_CHANGE,
+                state, -1).sendToTarget();
+    }
+
+    private void connectionFailed() {
+        Message msg = handler.obtainMessage(MessageConstants.MESSAGE_TOAST);
+        Bundle bundle = new Bundle();
+        bundle.putString(MessageConstants.TOAST, "Unable to connect device");
+        msg.setData(bundle);
+        handler.sendMessage(msg);
+
+        state = STATE_NONE;
+
+        notifyState();
+    }
+
+    private void connectionLost() {
+        // Send a failure message back to the Activity
+        Message msg = handler.obtainMessage(MessageConstants.MESSAGE_TOAST);
+        Bundle bundle = new Bundle();
+        bundle.putString(MessageConstants.TOAST, "Device connection was lost");
+        msg.setData(bundle);
+        handler.sendMessage(msg);
+
+        state = STATE_NONE;
+
+        notifyState();
     }
 
     private class ConnectedThread extends Thread {
@@ -91,6 +149,8 @@ public class BluetoothService {
 
             mmInStream = tmpIn;
             mmOutStream = tmpOut;
+            state = STATE_CONNECTED;
+            notifyState();
             Log.i(TAG, "Successfully established connected thread.");
             write("ping\n".getBytes());
         }
@@ -101,7 +161,7 @@ public class BluetoothService {
 
             Log.i(TAG, "Input stream is now open.");
 
-            while (true) {
+            while (state == STATE_CONNECTED) {
                 try {
                     numBytes = mmInStream.read(mmBuffer);
                     Message readMsg = handler.obtainMessage(
@@ -110,6 +170,7 @@ public class BluetoothService {
                     readMsg.sendToTarget();
                 } catch (IOException e) {
                     Log.d(TAG, "Input stream was disconnected", e);
+                    connectionLost();
                     break;
                 }
             }
@@ -157,6 +218,8 @@ public class BluetoothService {
                 Log.e(TAG, "Socket's create() method failed, e");
             }
             mmSocket = tmp;
+            state = STATE_CONNECTING;
+            notifyState();
         }
 
         @SuppressLint("MissingPermission")
@@ -168,6 +231,7 @@ public class BluetoothService {
             } catch(IOException connectException) {
                 handler.obtainMessage(ERROR_READ, "Unable to connect to the BT device").sendToTarget();
                 cancel();
+                connectionFailed();
                 return;
             }
 

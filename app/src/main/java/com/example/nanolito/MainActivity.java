@@ -12,6 +12,8 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -33,9 +35,16 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "Logs";
     public static Handler handler;
     private final static int ERROR_READ = 0;
+    private BluetoothAdapter bluetoothAdapter;
     private BluetoothDevice esp32;
-    private UUID espUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     private BluetoothService service;
+    private Button pidButton;
+    private CompoundButton stateButton;
+    private EditText pText;
+    private EditText iText;
+    private EditText dText;
+
+    private boolean bluetoothState;
 
     SharedPreferences sharedPref;
 
@@ -44,14 +53,23 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        BluetoothPermissionHelper bluetoothPermissionHelper = new BluetoothPermissionHelper(this);
-        bluetoothPermissionHelper.askForBluetoothPermissions();
+        pText = findViewById(R.id.PText);
+        iText = findViewById(R.id.IText);
+        dText = findViewById(R.id.DText);
+
+        pidButton = findViewById(R.id.PIDButton);
+        stateButton = findViewById(R.id.connectionSwitch);
+        stateButton.setChecked(bluetoothState);
+        setBluetoothState(false);
 
         sharedPref = getSharedPreferences("NanolitoSettings", Context.MODE_PRIVATE);
 
-        String address = sharedPref.getString("deviceAddress", null);
-        TextView addressText = findViewById(R.id.testAddress);
-        addressText.setText(address == null ? "Selecciona un dispositivo" : address);
+        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
+        if (bluetoothAdapter == null) {
+            Toast.makeText(this, "Bluetooth is not available", Toast.LENGTH_LONG).show();
+            this.finish();
+        }
 
         handler = new Handler(Looper.getMainLooper()){
             @Override
@@ -59,22 +77,71 @@ public class MainActivity extends AppCompatActivity {
                 switch(msg.what) {
                     case MessageConstants.MESSAGE_READ:
                         String espMsg = msg.obj.toString();
-                        addressText.setText(espMsg);
                         Log.i(TAG, "received: " + espMsg);
                         break;
                     case MessageConstants.MESSAGE_TOAST:
-                        String text = (String) msg.getData().get("toast");
+                        String text = (String) msg.getData().get(MessageConstants.TOAST);
                         Toast.makeText(getApplicationContext(), text, Toast.LENGTH_LONG).show();
+                        break;
+                    case MessageConstants.MESSAGE_STATE_CHANGE:
+                        handleBluetoothState(msg.arg1);
                         break;
                 }
             }
         };
+    }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        if (bluetoothAdapter == null) {
+            return;
+        }
+
+        if (!bluetoothAdapter.isEnabled())
+        {
+            BluetoothPermissionHelper bluetoothPermissionHelper = new BluetoothPermissionHelper(this);
+            bluetoothPermissionHelper.setOnBluetoothPermissionsGrantedListener(this::setupBluetoothComs);
+            bluetoothPermissionHelper.askForBluetoothPermissions();
+        }
+
+        setupBluetoothComs();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+
+    }
+
+    @Override public void onDestroy() {
+        super.onDestroy();
+        if (service != null) {
+            service.stop();
+        }
+    }
+
+    private void setupBluetoothComs() {
+        String address = sharedPref.getString("deviceAddress", null);
         if(address != null) {
 
             esp32 = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(address);
             service = new BluetoothService(handler);
-            service.start(esp32);
+        }
+        stateButton.setEnabled(address != null);
+    }
+
+    private void handleBluetoothState(final int state) {
+        switch(state) {
+            case BluetoothService.STATE_CONNECTED:
+                setBluetoothState(true);
+                break;
+            case BluetoothService.STATE_CONNECTING:
+            case BluetoothService.STATE_NONE:
+                setBluetoothState(false);
+                break;
         }
     }
 
@@ -83,13 +150,37 @@ public class MainActivity extends AppCompatActivity {
         startActivity(i);
     }
 
-    public void sendMessage(View v)  {
-        EditText text = findViewById(R.id.textBox);
+    public void sendPID(View v) {
+        float pValue =  Float.parseFloat(pText.getText().toString());
+        float iValue =  Float.parseFloat(iText.getText().toString());
+        float dValue =  Float.parseFloat(dText.getText().toString());
+
         try{
-            service.sendMessage(text.getText().toString());
+            service.sendMessage("p:" + pValue + "|i:" + iValue + "|d:" + dValue);
         } catch (IOException e) {
             Log.e(TAG, "Bluetooth Connection not started", e);
         }
-        text.setText("");
+    }
+
+    public void onConnectionSwitch(View v) {
+        if(stateButton.isChecked()) {
+            if (service != null) {
+                service.start(esp32);
+            }
+        } else {
+            if (service != null) {
+                service.stop();
+            }
+        }
+
+        Log.i(TAG, "Connection switch pressed: " + (stateButton.isChecked() ? "ON" : "OFF"));
+    }
+
+    private void setBluetoothState(boolean state) {
+        bluetoothState = state;
+        pidButton.setEnabled(bluetoothState);
+        pText.setEnabled(bluetoothState);
+        iText.setEnabled(bluetoothState);
+        dText.setEnabled(bluetoothState);
     }
 }
