@@ -143,18 +143,23 @@ public class MainActivity extends AppCompatActivity {
 
     private void processMessage(String message) {
         char command = message.charAt(0);
+        String[] valuesStr = message.split(":");
         switch(command) {
             case 'A':
-                String[] valuesStr = message.substring(1).split(":");
-                for(int i = 0; i < valuesStr.length; i++) {
-                    sensores[i].setText(valuesStr[i]);
+                pidTexts[0].setText(valuesStr[1]);
+                pidTexts[1].setText(valuesStr[2]);
+                pidTexts[2].setText(valuesStr[3]);
+                break;
+            case 'B':
+                for(int i = 1; i < valuesStr.length; i++) {
+                    sensores[i - 1].setText(valuesStr[i]);
                     int valor = Integer.parseInt(valuesStr[i]);
                     if (valor > UMBRAL) {
-                        sensores[i].setBackgroundColor(Color.BLACK);
-                        sensores[i].setTextColor(Color.WHITE);
+                        sensores[i - 1].setBackgroundColor(Color.BLACK);
+                        sensores[i - 1].setTextColor(Color.WHITE);
                     } else {
-                        sensores[i].setBackgroundColor(Color.WHITE);
-                        sensores[i].setTextColor(Color.BLACK);
+                        sensores[i - 1].setBackgroundColor(Color.WHITE);
+                        sensores[i - 1].setTextColor(Color.BLACK);
                     }
                 }
                 break;
@@ -210,7 +215,7 @@ public class MainActivity extends AppCompatActivity {
         float dValue =  Float.parseFloat(pidTexts[2].getText().toString());
 
         try{
-            service.sendMessage("a" + pValue + ":" + iValue + ":" + dValue);
+            service.sendMessage("a:" + pValue + ":" + iValue + ":" + dValue);
         } catch (IOException e) {
             Log.e(TAG, "Bluetooth Connection not started", e);
         }
