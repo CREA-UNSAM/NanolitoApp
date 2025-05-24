@@ -251,4 +251,12 @@ public class MainActivity extends AppCompatActivity {
         float preValue = Float.parseFloat(field.getText().toString());
         field.setText(Float.toString(preValue + value));
     }
+
+    public void saveValues(View v) {
+        try{
+            service.sendMessage("b" );
+        } catch (IOException e) {
+            Log.e(TAG, "Bluetooth Connection not started", e);
+        }
+    }
 }

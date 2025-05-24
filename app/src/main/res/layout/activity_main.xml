@@ -15,6 +15,14 @@
         android:gravity="right|top"
         android:orientation="horizontal">
 
+        <ImageButton
+            android:id="@+id/saveButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0"
+            android:onClick="saveValues"
+            app:srcCompat="@android:drawable/ic_menu_save" />
+
         <ToggleButton
             android:id="@+id/connectionSwitch"
             android:layout_width="wrap_content"
