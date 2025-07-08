@@ -18,6 +18,7 @@ Confirmacion : envio letra de comando
 |   f   | Cambiar color líneas   |
 |   C   | Enviar la velocidad de los motores   |
 |   E   | Enviar distancia de la línea al centro   |
+|   F	| Desactivar modo Debug |
 	
 	
 
